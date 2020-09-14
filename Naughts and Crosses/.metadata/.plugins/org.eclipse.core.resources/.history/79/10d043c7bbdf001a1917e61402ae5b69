@@ -1,0 +1,22 @@
+package player.bot;
+
+public class HalfNode extends Node {
+
+	public SigNode(int size) {
+		super(size);
+	}
+	
+	public SigNode(double[] weights) {
+		super(weights);
+	}
+	
+	public SigNode(String weights) {
+		super(weights);
+	}
+
+	@Override
+	public double function(double in) {
+		return 1/(1 + Math.pow(Math.E, Math.E-in*2*Math.E));
+	}
+	
+}

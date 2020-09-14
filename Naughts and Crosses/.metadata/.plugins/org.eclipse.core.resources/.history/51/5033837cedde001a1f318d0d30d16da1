@@ -1,0 +1,18 @@
+package player;
+
+import game.Board;
+
+public class Random implements Player {
+
+	@Override
+	public char getPlayerChar() {
+		return 'r';
+	}
+
+	@Override
+	public void takeTurn(Board board) {
+		// TODO Auto-generated method stub
+		
+	}
+
+}

@@ -1,0 +1,15 @@
+package game;
+
+import java.util.Optional;
+
+import player.Player;
+
+public class Result {
+	Optional<Player> winner;
+	Optional<Player> loser;
+	
+	public Result(Player winner, Player loser) {
+		this.winner = Optional.of(winner);
+		this.loser = Optional.of(loser);
+	}
+}

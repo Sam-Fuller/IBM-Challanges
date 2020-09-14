@@ -1,0 +1,21 @@
+package player;
+
+import java.util.List;
+
+import game.Board;
+
+public class Random implements Player {
+
+	@Override
+	public char getPlayerChar() {
+		return 'r';
+	}
+
+	@Override
+	public void takeTurn(Board board) {
+		List<Integer> playable = new ArrayList<Integer>();
+		
+		
+	}
+
+}

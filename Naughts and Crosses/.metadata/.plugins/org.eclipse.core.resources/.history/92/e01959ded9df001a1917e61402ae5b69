@@ -1,0 +1,131 @@
+package player;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
+import game.Board;
+
+public class Perfect implements Player {
+
+	public static Map<Integer, Float> allStates = new HashMap<Integer, Float>();
+
+	public static float getValue(int board, boolean turn) {
+		if (allStates.containsKey(board)) return allStates.get(board);
+
+		int player;
+		if (turn) player = 2;
+		else player = 1;
+
+		Integer win = checkWin(board);
+
+		if (win != null) {
+			if (win == 0) {
+				allStates.put(board, 0f);
+				return 0;
+			}
+			
+			if (win == player) {
+				allStates.put(board, 1f);
+				return 1;
+			}
+			
+			if (win == 2) {
+				allStates.put(board, -1f);
+				return -1;
+			}
+		}
+
+		float value = 0;		
+		for (int i = 0; i < 9; i++) {
+			if (board(board, i%3, i/3) != 0) continue;
+			
+			int newBoard = board + player * (int) Math.pow(10, i);
+
+			float tempValue = -getValue(newBoard, !turn);
+			if (tempValue > value) value = tempValue;
+			
+			//value += getValue(newBoard, !turn) / 9f;
+			//TODO if (value == 1) break;
+		}
+		
+		allStates.put(board, value);
+		return value;
+	}
+
+	public static Integer checkWin(int board) {
+		//check rows
+		for (int y = 0; y < 3; y++) {
+			if (board(board, 0, y) != 0 && board(board, 0, y) == board(board, 1, y) && board(board, 0, y) == board(board, 2, y))
+				return board(board, 0, y);
+		}
+
+		//check cols
+		for (int x = 0; x < 3; x++) {
+			if (board(board, x, 0) != 0 && board(board, x, 0) == board(board, x, 1) && board(board, x, 0) == board(board, x, 2))
+				return board(board, x, 0);
+		}
+
+		//check diags
+		if (board(board, 0, 0) != 0 && board(board, 0, 0) == board(board, 1, 1) && board(board, 0, 0) == board(board, 2, 2)) {
+			return board(board, 0, 0);
+		}
+		if (board(board, 0, 2) != 0 && board(board, 2, 0) == board(board, 1, 1) && board(board, 1, 1) == board(board, 0, 2)) {
+			return board(board, 0, 2);
+		}
+
+		//if board is full
+		int count = 0;
+		for (int y = 0; y < 3; y++) {
+			for (int x = 0; x < 3; x++) {
+				if (board(board, x, y) != 0) count++;
+			}
+		}
+
+		if (count >= 9) {
+			return 0;
+		}
+
+		return null;
+	}
+
+	@Override
+	public char getPlayerChar() {
+		return 'p';
+	}
+
+	@Override
+	public void takeTurn(Board board) {
+		int intBoard = board.getIntBoard(this);
+
+		int player;
+		if (board.turn % 2 != 0) player = 1;
+		else player = 2;
+
+		float value = -2;
+		int bestMove = 0;
+
+		float[] s = new float[9];
+		
+		for (int i = 0; i < 9; i++) {
+			if (board(intBoard, i%3, i/3) != 0) continue;
+
+			int newBoard = intBoard + player * (int) Math.pow(10, i);
+
+			float tempValue = getValue(newBoard, board.turn % 2 != 0);
+			s[i] = tempValue;
+			if (tempValue > value) {
+				value = tempValue;
+				bestMove = i;
+			}
+		}
+
+		board.claim(this, bestMove%3, bestMove/3);
+	}
+
+	public static int board(int board, int x, int y) {
+		int player = (board / (int) Math.pow(10, (x + y*3))) % 10;
+		if (player == 2) player = -1;
+		return player;
+	}
+}

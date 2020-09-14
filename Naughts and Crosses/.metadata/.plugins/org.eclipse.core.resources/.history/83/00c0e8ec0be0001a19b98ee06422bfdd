@@ -1,0 +1,169 @@
+package Train;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
+import game.Game;
+import player.Blocker;
+import player.Bot;
+import player.Player;
+import player.Random;
+
+public class GenTrain {
+	public static final String file = "net.txt";
+	
+	public static final long epochs = 10000;
+	public static final long reportEveryXEpochs = 20;
+	public static final int genSize = 1000;
+
+	static final Bot template = new Bot(read(file));
+	static final Player blockerBot = new Blocker();
+	static final Player randomBot = new Random();
+	
+	static List<Bot> bots = Stream.generate(() -> new Bot(template)).limit(genSize).collect(Collectors.toList());
+	
+	public static void main(String[] args) {
+		vsAll(template);
+		
+		int lastTop = template.fitness;
+		int lastMedian = template.fitness;
+		int lastBottom = template.fitness;
+		double lastMean = template.fitness;
+		
+		for (long epoch = 0; epoch <= epochs; epoch+=reportEveryXEpochs) {
+			for (int i = 0; i<=100; i++) {
+				if (i%10 == 0) System.out.print(i/10);
+				else System.out.print("-");
+			}
+			System.out.print("\n#");
+			
+			long start = System.nanoTime();
+			int percent = 0;
+			for (int subEpoch = 0; subEpoch < reportEveryXEpochs; subEpoch++) {
+				for (int i = 0; i < bots.size()/3; i++) {
+					bots.set(bots.size()-i-1, new Bot(bots.get(i)));
+				}
+				
+				bots.parallelStream().forEach(x -> vsAll(x));
+				Collections.sort(bots);
+				
+				while (100*subEpoch/(reportEveryXEpochs) - percent > 0) {
+					System.out.print("#");
+					percent++;
+				}
+			};
+			while (percent < 100) {
+				System.out.print("#");
+				percent++;
+			}
+			
+			System.out.printf("\nEpoch: " + epoch + "\nTime/Epoch: %fs/epoch\n", ((System.nanoTime()-start)/reportEveryXEpochs/1000000000f));
+			
+			int top = 100*bots.get(0).fitness/genSize/2;
+			System.out.println((top>lastTop?"^":"v") + " Top:    " + top + "%");
+			lastTop = top;
+			
+			int median = 100*bots.get(genSize/2).fitness/genSize/2;
+			System.out.println((median>lastMedian?"^":"v") + " Median: " + median + "%");
+			lastMedian = median;
+			
+			int bottom = 100*bots.get(genSize-1).fitness/genSize/2;
+			System.out.println((bottom>lastBottom?"^":"v") + " Bottom: " + bottom + "%");
+			lastBottom = bottom;
+			
+			double mean = 0;
+			for (Bot bot: bots) mean += bot.fitness;
+			mean = 100*mean/genSize/genSize/2;
+			System.out.println((mean>lastMean?"^":"v") + " Mean:   " + mean + "%");
+			lastMean = mean;
+			
+			System.out.print("\n\n\n");
+			
+			write("Epoch_" + (epoch+reportEveryXEpochs) + "_" + top + "%_" + file, bots.get(0).saveable());
+		}
+
+		write(file, bots.get(0).saveable());
+		System.out.println("Fitest Saved");
+		System.out.println("" + 100*template.fitness/genSize/2 + "% -> " + 100*bots.get(0).fitness/genSize/2 + "%");
+	}
+	
+	private static List<String> read(String fileName) {
+		Path filePath = Paths.get(fileName);
+		
+		List<String> fileLines = new ArrayList<String>();
+		
+		try(Stream<String> file = Files.lines(filePath)) {
+			fileLines = file.collect(Collectors.toList());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return fileLines;
+	}
+	
+	private static void write(String fileName, String fileLines) {
+		Path filePath = Paths.get(fileName);
+		
+		try {
+			Files.write(filePath, fileLines.getBytes());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void vsAll(Bot player) {
+		int result = 0;
+		
+		for (Bot contender: bots) {
+			result += play(player, contender);
+			result += play(player, blockerBot);
+			result += play(player, randomBot);
+		}
+		
+		player.fitness = result;
+	}
+	
+	public static void vsBot(Bot player) {
+		int result = 0;
+		
+		for (Bot contender: bots) {
+			result += play(player, contender);
+		}
+		
+		player.fitness = result;
+	}
+	
+	public static void vsBlock(Bot player) {
+		int result = 0;
+		
+		for (int i = 0; i < bots.size(); i++) {
+			result += play(player, blockerBot);
+		}
+		
+		player.fitness = result;
+	}
+
+	public static int play(Player player1, Player player2) {
+		int result = 0;
+
+		int result1 = Game.play(player1, player2);
+		if (result1 == 1) result++;
+		else if (result1 == 2) result--;
+
+		int result2 = Game.play(player2, player1);
+		if (result2 == 1) result--;
+		else if (result2 == 2) result++;
+
+		return result;
+	}
+}

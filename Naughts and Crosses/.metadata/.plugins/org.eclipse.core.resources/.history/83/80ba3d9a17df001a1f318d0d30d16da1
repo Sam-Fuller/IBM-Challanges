@@ -1,0 +1,55 @@
+package player.bot;
+
+public abstract class Node {
+	public static final double maxChange = 0.001;
+	
+	double[] weights;
+	
+	public Node(int size) {
+		weights = new double[size];
+		
+		for (int i = 0; i < size; i++) weights[i] = Math.random();
+	}
+	
+	public Node(double[] weights) {
+		this.weights = weights;
+	}
+	
+	public Node(String weights) {
+		String[] values = weights.split(",");
+		this.weights = new double[values.length];
+		
+		for (int i = 0; i<this.weights.length; i++) {
+			this.weights[i] = Double.parseDouble(values[i]);
+		}
+	}
+
+	public abstract double function(double in);
+	
+	public double calculate(double[] in) {
+		double average = 0;
+		for (int i = 0; i < in.length; i++) average += in[i] * weights[i] / weights.length;
+		
+		return function(average);
+	}
+
+	public void change() {
+		for (int i = 0; i < weights.length; i++) {
+			weights[i] += (Math.random()-0.5) * maxChange;
+			if (weights[i] < 0) weights[i] = 0;
+			else if (weights[i] > 1) weights[i] = 1;
+		}
+	}
+	
+	@Override
+	public String toString() {
+		String values = "";
+		
+		values += weights[0];
+		for (int i = 1; i < weights.length; i++) {
+			values += "," + weights[i];
+		}
+		
+		return values;
+	}
+}

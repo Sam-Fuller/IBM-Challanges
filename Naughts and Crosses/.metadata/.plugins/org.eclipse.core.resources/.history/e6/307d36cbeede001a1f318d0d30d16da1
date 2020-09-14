@@ -1,0 +1,11 @@
+package player.bot;
+
+public class linNode extends Node {
+
+	@Override
+	public double calculate(double[] in) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+}

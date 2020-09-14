@@ -1,0 +1,95 @@
+package Train;
+
+
+import interfaces.Algorithm;
+import interfaces.Problem;
+import utils.RunAndStore.FTrend;
+import utils.algorithms.cmaes.CMAEvolutionStrategy;
+
+import static utils.MatLab.max;
+import static utils.MatLab.min;
+
+/**
+ * Covariance Matrix Adaptation Evolutionary Strategy 
+ */
+public class Covariance_matrix_adaption_evolution_strategy {
+	public double[] execute(int maxEvaluations) throws Exception { //this function implement the algorithm
+		int problemDimension = problem.getDimension();
+		double[][] bounds = problem.getBounds();
+
+		double[] best = new double[problemDimension];
+		double fBest = Double.NaN;
+		
+		double[] initialSolution = new double[problemDimension];
+		double initialFitness = 0;
+		
+		int j = 0;
+		if (initialSolution != null) {
+			best = initialSolution;
+			fBest = initialFitness;
+		}
+		else { //if not inserted, we need to randomly sample the initial guess
+			best = generateRandomSolution(bounds, problemDimension);
+			fBest = problem.f(best);
+			j++;
+		}
+		// new a CMA-ES and set some initial values
+		CMAEvolutionStrategy cma = new CMAEvolutionStrategy();
+		cma.setRepairMatrix(true);				// repair ill-conditioned matrix
+		cma.setDimension(problemDimension);		// overwrite some loaded properties
+		cma.setInitialX(best);					// in each dimension, also setTypicalX can be used
+		cma.setInitialStandardDeviation(0.2);	// also a mandatory setting 
+		cma.options.verbosity = -1;
+		cma.options.writeDisplayToFile = -1;
+
+		// initialize cma and get fitness array to fill in later
+		double[] fitness = cma.init();
+
+		// iteration loop
+		while (j < maxEvaluations) {
+			// --- core iteration step ---
+			// get a new population of solutions
+			double[][] pop = cma.samplePopulation();
+
+			for(int i = 0; i < pop.length && j < maxEvaluations; ++i) { 
+				// saturate solution on bounds 
+				pop[i] = saturate(pop[i], bounds);
+
+				// compute fitness/objective value	
+				fitness[i] = problem.f(pop[i]);
+
+				// save best
+				if (fitness[i] < fBest) {
+					fBest = fitness[i];
+					for (int n = 0; n < problemDimension; n++)
+						best[n] = pop[i][n];
+				}
+
+				j++;
+			}
+
+			// pass fitness array to update search distribution
+			cma.updateDistribution(fitness);
+		}
+
+		return best;
+	}
+	
+	public static double[] saturate(double[] x, double[][] bounds) {
+		int n = x.length;
+		double[] x_sat = new double[n];
+		for (int i = 0; i < n; i++)
+			x_sat[i] = min(max(x[i], bounds[i][0]), bounds[i][1]);
+		return x_sat;
+	}
+	
+	public static double[] generateRandomSolution(double[][] bounds, int n) {
+		double[] r = new double[n];
+
+		for (int i = 0; i < n; i++) {
+			r[i] = Math.random() * (bounds[i][1] - bounds[i][0]) + bounds[i][0];
+		}
+
+		return r;
+	}
+}

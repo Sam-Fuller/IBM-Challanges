@@ -1,0 +1,66 @@
+package player;
+
+import game.Board;
+import player.bot.Network;
+
+public class Bot implements Player {
+	Network model = new Network();
+
+	public Bot() {}
+	public Bot(Bot copy) {
+		model = new Network(copy.model);
+	}
+	
+	@Override
+	public char getPlayerChar() {
+		return 'b';
+	}
+
+	@Override
+	public void takeTurn(Board board) {
+		
+		double[] input = new double[18];
+		
+		for (int y = 0; y < 3; y++) {
+			for (int x = 0; x < 3; x++) {
+				if (board.board[x][y] == null) {
+					input[(x*3+y)*2] = 0;
+					input[(x*3+y)*2+1] = 0;
+					
+				} else if (board.board[x][y].equals(this)) {
+					input[(x*3+y)*2] = 1;
+					input[(x*3+y)*2+1] = 0;
+					
+				} else {
+					input[(x*3+y)*2] = 0;
+					input[(x*3+y)*2+1] = 1;
+				}
+			}
+		}
+		
+		double[] outputArray = model.calculate(input);
+		
+		double highest = -1;
+		int output = -1;
+		
+		for (int i = 0; i < outputArray.length; i++) {
+			if (board.isValid(i%3, i/3)) {
+				if (output == -1) {
+					highest = outputArray[i];
+					output = i;
+				} else if (outputArray[i] > highest) {
+					highest = outputArray[i];
+					output = i;
+				} 
+			}
+		}
+		
+		board.claim(this, output%3, output/3);
+	}
+	
+	@Override
+	public String toString() {
+		return model.toString();
+	}
+
+}

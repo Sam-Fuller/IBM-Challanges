@@ -1,0 +1,147 @@
+package Train;
+
+
+import interfaces.Algorithm;
+import interfaces.Problem;
+import player.Blocker;
+import player.Bot;
+import player.Player;
+import player.Random;
+import utils.RunAndStore.FTrend;
+import utils.algorithms.cmaes.CMAEvolutionStrategy;
+
+import static utils.MatLab.max;
+import static utils.MatLab.min;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import game.Game;
+
+/**
+ * Covariance Matrix Adaptation Evolutionary Strategy 
+ */
+public class Covariance_matrix_adaption_evolution_strategy {
+	public static void main(String[] args) {
+		write(file, new Bot(execute(10)).saveable());
+	}
+	
+	private static void write(String fileName, String fileLines) {
+		Path filePath = Paths.get(fileName);
+		
+		try {
+			Files.write(filePath, fileLines.getBytes());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static double[] execute(int maxEvaluations) { //this function implement the algorithm
+		int problemDimension = 432;
+
+		double[] best = new double[problemDimension];
+		double fBest = Double.NaN;
+		
+		double[] initialSolution = new double[problemDimension];
+		double initialFitness = 0;
+		
+		int j = 0;
+		if (initialSolution != null) {
+			best = initialSolution;
+			fBest = initialFitness;
+		}
+		else { //if not inserted, we need to randomly sample the initial guess
+			best = generateRandomSolution(problemDimension);
+			fBest = vsBlock(best);
+			j++;
+		}
+		// new a CMA-ES and set some initial values
+		CMAEvolutionStrategy cma = new CMAEvolutionStrategy();
+		cma.setRepairMatrix(true);				// repair ill-conditioned matrix
+		cma.setDimension(problemDimension);		// overwrite some loaded properties
+		cma.setInitialX(best);					// in each dimension, also setTypicalX can be used
+		cma.setInitialStandardDeviation(0.2);	// also a mandatory setting 
+		cma.options.verbosity = -1;
+		cma.options.writeDisplayToFile = -1;
+
+		// initialize cma and get fitness array to fill in later
+		double[] fitness = cma.init();
+
+		// iteration loop
+		while (j < maxEvaluations) {
+			// --- core iteration step ---
+			// get a new population of solutions
+			double[][] pop = cma.samplePopulation();
+
+			for(int i = 0; i < pop.length && j < maxEvaluations; ++i) { 
+				// saturate solution on bounds 
+				pop[i] = saturate(pop[i]);
+
+				// compute fitness/objective value	
+				fitness[i] = vsBlock(pop[i]);
+
+				// save best
+				if (fitness[i] < fBest) {
+					fBest = fitness[i];
+					for (int n = 0; n < problemDimension; n++)
+						best[n] = pop[i][n];
+				}
+
+				j++;
+			}
+
+			// pass fitness array to update search distribution
+			cma.updateDistribution(fitness);
+		}
+
+		return best;
+	}
+	
+	public static double[] saturate(double[] x) {
+		int n = x.length;
+		double[] x_sat = new double[n];
+		for (int i = 0; i < n; i++)
+			x_sat[i] = min(max(x[i], 0), 1);
+		return x_sat;
+	}
+	
+	public static double[] generateRandomSolution(int n) {
+		double[] r = new double[n];
+
+		for (int i = 0; i < n; i++) {
+			r[i] = Math.random();
+		}
+
+		return r;
+	}
+	
+	
+	static final Player blockerBot = new Blocker();
+	
+	public static int vsBlock(double[] network) {
+		Bot player = new Bot(network);
+		int result = 0;
+		
+		for (int i = 0; i < 1000; i++) {
+			result += play(player, blockerBot);
+		}
+		
+		return result;
+	}
+
+	public static int play(Player player1, Player player2) {
+		int result = 0;
+
+		int result1 = Game.play(player1, player2);
+		if (result1 == 1) result++;
+		else if (result1 == 2) result--;
+
+		int result2 = Game.play(player2, player1);
+		if (result2 == 1) result--;
+		else if (result2 == 2) result++;
+
+		return result;
+	}
+}

@@ -1,0 +1,22 @@
+package game;
+
+import player.Player;
+
+public class Game {
+	public Result play(Player player1, Player player2) {
+		Board board = new Board();
+		
+		while (true) {
+			player1.takeTurn(board);
+			player2.takeTurn(board);
+		}
+		
+		return null;
+		
+	}
+	
+	public static void main(String[] args) {
+
+	}
+	
+}

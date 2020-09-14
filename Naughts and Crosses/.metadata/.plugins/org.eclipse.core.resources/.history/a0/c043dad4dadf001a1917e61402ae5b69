@@ -1,0 +1,18 @@
+package player;
+
+import game.Board;
+
+public class Blocker implements Player {
+
+	@Override
+	public char getPlayerChar() {
+		return 'b';
+	}
+
+	@Override
+	public void takeTurn(Board board) {
+		// TODO Auto-generated method stub
+		
+	}
+
+}

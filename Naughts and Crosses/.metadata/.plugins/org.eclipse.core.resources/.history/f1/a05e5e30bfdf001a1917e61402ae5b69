@@ -1,0 +1,62 @@
+package player.bot;
+
+import java.util.List;
+
+public class Network {
+	int row1size = 16;
+	int row2size = 9;
+	
+	//input is 18
+	Node[] row1 = new Node[row1size];
+	Node[] row2 = new Node[row2size];
+	
+	public Network() {
+		for (int i = 0; i < row1size; i++) row1[i] = new HalfNode(18);
+		for (int i = 0; i < row2size; i++) row2[i] = new LinNode(row1size);
+	}
+	
+	
+	public Network(Network network) {
+		row1 = network.row1.clone();
+		for (int i = 0; i < row1size; i++) row1[i].change();
+		
+		row2 = network.row2.clone();
+		for (int i = 0; i < row2size; i++) row2[i].change();
+	}
+	
+	public Network(List<String> net) {
+		for (int i = 0; i < row1size; i++) {
+			row1[i] = new SigNode(net.get(i));
+		}
+		
+		for (int i = 0; i < row2size; i++) {
+			row2[i] = new SigNode(net.get(i+row1size));
+		}
+	}
+
+
+	public double[] calculate(double[] in) {
+		double[] row1Result = new double[row1size];
+		for (int i = 0; i < row1size; i++) row1Result[i] = row1[i].calculate(in);
+		
+		double[] row2Result = new double[row2size];
+		for (int i = 0; i < row2size; i++) row2Result[i] = row2[i].calculate(row1Result);
+
+		return row2Result;
+	}
+	
+	@Override
+	public String toString() {
+		String values = "";
+		
+		for (Node node: row1) {
+			values += node.toString() + "\n";
+		}
+		
+		for (Node node: row2) {
+			values += node.toString() + "\n";
+		}
+		
+		return values;
+	}
+}

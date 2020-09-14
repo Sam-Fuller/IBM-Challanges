@@ -1,0 +1,7 @@
+INDEX VERSION 1.131+D:\Naughts and Crosses\.metadata\.plugins\org.eclipse.jdt.core
+394551074.index
+2645920439.index
+1549515899.index
+1799304778.index
+4003110244.index
+25931522.index

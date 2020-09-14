@@ -1,0 +1,124 @@
+package game;
+
+import java.util.Arrays;
+import java.util.Optional;
+
+import player.Human;
+import player.Player;
+
+public class Board {
+	public Player[][] board = new Player[3][3];
+	public int turn = 0;
+
+	public void render() {
+		System.out.print("\n\n");
+
+		for (int y = 0; y < 5; y++) {
+			if (y%2 == 0) {
+				for (int x = 0; x < 5; x++) {
+					if (x%2 != 0) System.out.print("|");
+					else if (board[x/2][y/2] == null) System.out.print(y/2*3+x/2);
+					else System.out.print(board[x/2][y/2].getPlayerChar());
+				}
+			} else {
+				for (int x = 0; x < 5; x++) System.out.print("-");
+			}
+			System.out.print("\n");
+		}
+
+	}
+
+	public boolean isValid(int x, int y) {
+		if (board[x][y] == null) return true;
+		return false;
+	}
+
+	public void claim(Player player, int x, int y) {
+		if (isValid(x,y)) {
+			board[x][y] = player;
+			turn++;
+		}
+	}
+	
+	public boolean wouldWin(Player player, int x, int y) {
+		boolean wouldWin = false;
+		
+		if (isValid(x,y)) {
+			board[x][y] = player;
+			Optional<Player> winner = checkWin();
+			
+			if (winner.isPresent()) {
+				if (winner.equals(player)) {
+					wouldWin = true;
+				}
+			}
+			
+		}
+	}
+
+	public Optional<Player> checkWin() {
+		//check rows
+		for (int y = 0; y < 3; y++) {
+			if (board[0][y] != null && board[1][y] != null && board[2][y] != null) {
+				if (board[0][y].equals(board[1][y]) && board[0][y].equals(board[2][y])) {
+					return Optional.of(board[0][y]);
+				}
+			}
+		}
+
+		//check cols
+		for (int x = 0; x < 3; x++) {
+			if (board[x][0] != null && board[x][1] != null && board[x][2] != null) {
+				if (board[x][0].equals(board[x][1]) && board[x][0].equals(board[x][2])) {
+					return Optional.of(board[x][0]);
+				}
+			}
+		}
+
+		//check diags
+		if (board[0][0] != null && board[1][1] != null && board[2][2] != null) {
+			if (board[0][0].equals(board[1][1]) && board[0][0].equals(board[2][2])) {
+				return Optional.of(board[0][0]);
+			}
+		}
+		if (board[2][0] != null && board[1][1] != null && board[0][2] != null) {
+			if (board[2][0].equals(board[1][1]) && board[2][0].equals(board[0][2])) {
+				return Optional.of(board[2][0]);
+			}
+		}
+
+		//if board is full
+		int count = 0;
+		for (int y = 0; y < 3; y++) {
+			for (int x = 0; x < 3; x++) {
+				if (board[x][y] != null) count++;
+			}
+		}
+
+		if (count >= 9) return Optional.of(new Human());
+
+		return Optional.empty();
+	}
+	
+	public int getIntBoard(Player player) {
+		int intBoard = 0;
+
+		for (int x = 0; x < 3; x++) {
+			for (int y = 0; y < 3; y++) {
+				int val;
+				Player tempPlayer = board[x][y];
+				
+				if (tempPlayer == null) val = 0;
+				else {
+					if (player == null) player = tempPlayer;
+					if (tempPlayer.equals(player)) val = 1;
+					else val = 2;
+				}
+				
+				intBoard += val * Math.pow(10, (x + y * 3));
+			}
+		}
+		
+		return intBoard;
+	}
+}

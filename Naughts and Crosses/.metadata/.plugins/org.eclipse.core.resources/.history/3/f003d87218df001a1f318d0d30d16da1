@@ -1,0 +1,58 @@
+package game;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import player.Bot;
+import player.Human;
+import player.Player;
+import player.Random;
+
+public class Game {
+	public static final String file = "net.txt";
+	
+	public static int play(Player player1, Player player2) {
+		Board board = new Board();
+		Optional<Player> winner;
+		
+		while(true) {
+			player1.takeTurn(board);
+			winner = board.checkWin();
+			if (winner.isPresent()) break;
+			
+			player2.takeTurn(board);
+			winner = board.checkWin();
+			if (winner.isPresent()) break;
+		}
+		
+		if (winner.get().equals(player1)) return 1;
+		else if (winner.get().equals(player2)) return 2;
+		else return 0;
+	}
+	
+	public static void main(String[] args) {
+		play(new Human(), new Bot(read(file)));
+	}
+	
+	
+	private static List<String> read(String fileName) {
+		Path filePath = Paths.get(fileName);
+		
+		List<String> fileLines = new ArrayList<String>();
+		
+		try(Stream<String> file = Files.lines(filePath)) {
+			fileLines = file.collect(Collectors.toList());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return fileLines;
+	}
+}

@@ -1,0 +1,42 @@
+package player;
+
+import java.util.Scanner;
+
+import game.Board;
+
+public class Human implements Player {
+	char playerChar = ' ';
+	long lastTurn = 0;
+
+	@Override
+	public char getPlayerChar() {
+		return playerChar;
+	}
+
+	@Override
+	public void takeTurn(Board board) {
+		if (lastTurn != 0) {
+			System.out.println("turn took: " + ((float)(System.nanoTime() - lastTurn) / 1000000000) + "s");
+		}
+		
+		Scanner scn = new Scanner(System.in);
+
+		if (playerChar == ' ') {
+			System.out.print("Enter a player character: ");
+			playerChar = scn.next().charAt(0);
+		}
+		
+		board.render();
+		
+		System.out.print(playerChar + ": Take your turn: ");
+		int playerChoice = scn.nextInt();
+		
+		int x = playerChoice % 3;
+		int y = playerChoice / 3;
+		
+		board.claim(this, x, y);
+		
+		lastTurn = System.nanoTime();
+	}
+
+}

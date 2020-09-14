@@ -1,0 +1,28 @@
+package player;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import game.Board;
+
+public class Random implements Player {
+
+	@Override
+	public char getPlayerChar() {
+		return 'r';
+	}
+
+	@Override
+	public void takeTurn(Board board) {
+		List<Integer> playable = new ArrayList<Integer>();
+		
+		for (int y = 0; y < 3; y++) {
+			for (int x = 0; x < 3; x++) {
+				if (board.board[x][y] != null) playable.add(y*3+x);
+			}
+		}
+		
+		playable.get((int) (Math.random() * playable.size()));
+	}
+
+}

@@ -1,0 +1,15 @@
+package player.bot;
+
+public class LinNode extends Node {
+
+	public LinNode(double[] weights) {
+		super(weights);
+		// TODO Auto-generated constructor stub
+	}
+
+	@Override
+	public double function(double in) {
+		return in;
+	}
+
+}

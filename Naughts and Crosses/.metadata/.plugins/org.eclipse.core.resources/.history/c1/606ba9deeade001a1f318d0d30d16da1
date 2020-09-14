@@ -1,0 +1,6 @@
+package game;
+
+public class Result {
+	boolean draw;
+	Player winner;
+}

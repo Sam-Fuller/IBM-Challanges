@@ -1,0 +1,36 @@
+package game;
+
+import java.util.Optional;
+
+import player.Human;
+import player.Player;
+
+public class Game {
+	public static int play(Player player1, Player player2) {
+		Board board = new Board();
+		Optional<Player> winner;
+		
+		while(true) {
+			player1.takeTurn(board);
+			winner = board.checkWin();
+			if (winner.isPresent()) break;
+			
+			player2.takeTurn(board);
+			winner = board.checkWin();
+			if (winner.isPresent()) break;
+		}
+		
+		if (winner.get() == null) System.out.print("draw");
+		else if (winner.get().equals(player1)) System.out.print("player1");
+		else if (winner.get().equals(player2)) System.out.print("player2");
+		
+		
+		return 0;
+		
+	}
+	
+	public static void main(String[] args) {
+		play(new Human(), new Human());
+	}
+	
+}

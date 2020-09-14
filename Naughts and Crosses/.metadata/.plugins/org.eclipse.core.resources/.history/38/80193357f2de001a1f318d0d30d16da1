@@ -1,0 +1,21 @@
+package player.bot;
+
+public class LinNode extends Node {
+
+	public LinNode(int size) {
+		weights = new double[size];
+		
+		for (int i = 0; i < size; i++) weights[i] = Math.random();
+	}
+	
+	public LinNode(double[] weights) {
+		super(weights);
+		// TODO Auto-generated constructor stub
+	}
+
+	@Override
+	public double function(double in) {
+		return in;
+	}
+
+}

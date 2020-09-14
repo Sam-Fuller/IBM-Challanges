@@ -1,0 +1,21 @@
+package player;
+
+import game.Board;
+
+public class Blocker implements Player {
+
+	@Override
+	public char getPlayerChar() {
+		return 'b';
+	}
+
+	@Override
+	public void takeTurn(Board board) {
+		Player enemy;
+		
+		for (int i = 0; i < 9; i++) {
+			
+		}
+	}
+
+}

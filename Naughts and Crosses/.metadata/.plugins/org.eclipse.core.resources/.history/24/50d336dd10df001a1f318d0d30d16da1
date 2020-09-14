@@ -1,0 +1,18 @@
+package player.bot;
+
+public class LinNode extends Node {
+
+	public LinNode(int size) {
+		super(size);
+	}
+	
+	public LinNode(double[] weights) {
+		super(weights);
+	}
+
+	@Override
+	public double function(double in) {
+		return in;
+	}
+
+}

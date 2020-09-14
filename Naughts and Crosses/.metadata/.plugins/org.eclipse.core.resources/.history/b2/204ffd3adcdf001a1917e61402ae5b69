@@ -1,0 +1,40 @@
+package player;
+
+import game.Board;
+
+public class Blocker implements Player {
+
+	@Override
+	public char getPlayerChar() {
+		return 'b';
+	}
+
+	@Override
+	public void takeTurn(Board board) {
+		Player enemy = null;
+
+		for (int x = 0; x < 3; x++) {
+			for (int y = 0; y < 3; y++) {
+				if (board.board[x][y] == null) continue;
+				if (board.board[x][y].equals(this)) continue;
+
+				enemy = board.board[x][y];
+				break;
+			}
+		}
+
+		if (enemy == null) {
+			board.claim(this, 1, 1);
+		}
+
+		for (int x = 0; x < 3; x++) {
+			for (int y = 0; y < 3; y++) {
+				if (board.wouldWin(enemy, x, y)) {
+					board.claim(this, x, y);
+					return;
+				}
+			}
+		}
+	}
+
+}

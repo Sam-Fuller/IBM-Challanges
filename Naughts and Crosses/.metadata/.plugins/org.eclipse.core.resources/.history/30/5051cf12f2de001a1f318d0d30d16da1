@@ -1,0 +1,10 @@
+package player.bot;
+
+public class linNode extends Node {
+
+	@Override
+	public double function(double in) {
+		return in;
+	}
+
+}

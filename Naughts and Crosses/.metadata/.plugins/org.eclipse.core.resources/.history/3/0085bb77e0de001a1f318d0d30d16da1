@@ -1,0 +1,13 @@
+package game;
+
+import player.Player;
+
+public class Result {
+	Player winner;
+	Player loser;
+	
+	public Result(Player winner, Player loser) {
+		this.winner = winner;
+		this.loser = loser;
+	}
+}

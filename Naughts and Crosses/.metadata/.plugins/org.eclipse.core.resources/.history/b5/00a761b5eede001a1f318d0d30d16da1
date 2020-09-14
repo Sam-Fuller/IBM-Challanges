@@ -1,0 +1,5 @@
+package player.bot;
+
+public class linNode extends Node {
+
+}

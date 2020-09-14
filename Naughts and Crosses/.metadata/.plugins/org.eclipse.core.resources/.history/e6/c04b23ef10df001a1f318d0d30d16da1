@@ -1,0 +1,49 @@
+package player.bot;
+
+import java.util.Arrays;
+
+public abstract class Node {
+	public static final double maxChange = 0.1;
+	
+	double[] weights;
+	
+	public Node(int size) {
+		weights = new double[size];
+		
+		for (int i = 0; i < size; i++) weights[i] = Math.random();
+	}
+	
+	public Node(double[] weights) {
+		this.weights = weights;
+	}
+	
+	public Node(String weights) {
+		// TODO Auto-generated constructor stub
+	}
+
+	public abstract double function(double in);
+	
+	public double calculate(double[] in) {
+		double average = 0;
+		for (int i = 0; i < in.length; i++) average += in[i] * weights[i] / weights.length;
+		
+		return function(average);
+	}
+
+	public void change() {
+		for (int i = 0; i < weights.length; i++) weights[i] += (Math.random()-0.5) * maxChange;
+	}
+	
+	@Override
+	public String toString() {
+		String values = "[";
+		
+		values += weights[0];
+		for (int i = 1; i < weights.length; i++) {
+			values += "," + weights[i];
+		}
+		values += "]";
+		
+		return values;
+	}
+}

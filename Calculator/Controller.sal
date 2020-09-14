@@ -1,0 +1,84 @@
+parse(text) <- calculateAll(text.split(" "), []).reverse();
+
+
+
+calculateAll(text| text.length == 0, stack) <- stack;
+
+calculateAll(text, stack) <- calculateAll(newText, newStack)
+    |newText = text.slice(0, text.length-1)
+    |newStack = calculateSingle(text[text.length-1], stack)
+;
+
+
+splitStack1(stack) <- [stackHead, argA]
+    |stackHead = stack.slice(0, stack.length-1)
+    |argA = stack[stack.length-1]
+;
+
+splitStack2(stack) <- [stackHead, argA, argB]
+    |stackHead = stack.slice(0, stack.length-2)
+    |argA = stack[stack.length-1]
+    |argB = stack[stack.length-2]
+;
+
+
+
+calculateSingle("+", stack) <- stackHead:(argA + argB)
+    |[stackHead, argA, argB] = splitStack2(stack)
+;
+
+calculateSingle("-", stack) <- stackHead:(argA - argB)
+    |[stackHead, argA, argB] = splitStack2(stack)
+;
+
+calculateSingle("*", stack) <- stackHead:(argA * argB)
+    |[stackHead, argA, argB] = splitStack2(stack)
+;
+
+calculateSingle("/", stack) <- stackHead:(argA / argB)
+    |[stackHead, argA, argB] = splitStack2(stack)
+;
+
+calculateSingle("%", stack) <- stackHead:(argA % argB)
+    |[stackHead, argA, argB] = splitStack2(stack)
+;
+
+calculateSingle("^", stack) <- stackHead:(Math.pow(argA, argB))
+    |[stackHead, argA, argB] = splitStack2(stack)
+;
+
+
+calculateSingle("::", stack) <- stackHead:([genList(argA, argB)])
+    |[stackHead, argA, argB] = splitStack2(stack)
+;
+genList(numA, numB) <- [numA .. numB];
+
+calculateSingle(":", stack) <- [stack.reverse()];
+
+calculateSingle(".+", stack) <- stackHead:(:+argA)
+    |[stackHead, argA] = splitStack1(stack)
+;
+
+calculateSingle(".*", stack) <- stackHead:(:*argA)
+    |[stackHead, argA] = splitStack1(stack)
+;
+
+
+calculateSingle(fStr| fStr.startsWith(":(") && fStr.endsWith(")"), stack) <- stackHead:(mapFunction(f, argA))
+    |f = new Function("x", "return "+fStr.substring(2, fStr.length-1))
+    |[stackHead, argA] = splitStack1(stack)
+;
+mapFunction(f, arg| arg.length) <- [arg.map(f)];
+mapFunction(f, arg) <- [arg].map(f);
+
+
+calculateSingle(fStr| fStr.startsWith(".(") && fStr.endsWith(")"), stack) <- stackHead:(reduceFunction(f, argA))
+    |f = new Function("x, y", "return "+fStr.substring(2, fStr.length-1))
+    |[stackHead, argA] = splitStack1(stack)
+;
+reduceFunction(f, args| args.length == 2) <- f(args[1], args[0]);
+reduceFunction(f, args) <- f(argA, reduceFunction(f, stackHead))
+    |[stackHead, argA] = splitStack1(args)
+;
+
+calculateSingle(num, stack) <- stack:parseFloat(num);

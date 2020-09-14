@@ -1,0 +1,10 @@
+package player.bot;
+
+public class sigNode extends Node {
+
+	@Override
+	public double function(double in) {
+		return (1/(1 + Math.pow(Math.E, -in)) +5)/10;
+	}
+
+}

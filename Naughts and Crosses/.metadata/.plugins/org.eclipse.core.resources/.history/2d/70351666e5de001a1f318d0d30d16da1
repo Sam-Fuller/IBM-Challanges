@@ -1,0 +1,36 @@
+package player;
+
+import java.util.Scanner;
+
+import game.Board;
+
+public class Human implements Player {
+	char playerChar = ' ';
+
+	@Override
+	public char getPlayerChar() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public void takeTurn(Board board) {
+		Scanner scn = new Scanner(System.in);
+
+		if (playerChar == ' ') {
+			System.out.print("Enter a player character: ");
+			playerChar = scn.next().charAt(0);
+		}
+		
+		board.render();
+		
+		System.out.print("Take your turn, give your position from 0-8 starting top left reading left to right, top to bottom: ");
+		int playerChoice = scn.nextInt();
+		
+		int x = playerChoice % 3;
+		int y = playerChoice / 3;
+		
+		board.claim(this, x, y);
+	}
+
+}

@@ -1,0 +1,20 @@
+package game;
+
+import player.Player;
+
+public class Game {
+
+	static Board board;
+	Player player1;
+	Player player2;
+	
+	public Result play(Player player1, Player player2) {
+		return null;
+		
+	}
+	
+	public static void main(String[] args) {
+
+	}
+	
+}

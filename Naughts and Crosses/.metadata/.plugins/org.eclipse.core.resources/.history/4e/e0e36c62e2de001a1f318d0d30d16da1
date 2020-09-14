@@ -1,0 +1,8 @@
+package player;
+
+import game.Board;
+
+public interface Player {
+	public char getPlayerChar();
+	public void takeTurn(Board board);
+}
